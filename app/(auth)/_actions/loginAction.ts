@@ -1,6 +1,7 @@
 "use server"
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 type PrevState = {
   success: boolean
@@ -28,7 +29,7 @@ export const loginAction=async(prevState:PrevState,formData:FormData)=>{
         },
         body:JSON.stringify(payload)
     });
-    const result:PrevState=await res.json();
+    const result=await res.json();
 
     // set cookies into browser
     if(result.success){
@@ -47,6 +48,8 @@ export const loginAction=async(prevState:PrevState,formData:FormData)=>{
             sameSite:"lax"
             
         })
+
+        redirect("/dashboard")
     }
 
     return result

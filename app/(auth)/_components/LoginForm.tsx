@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input"
 import { loginAction } from "../_actions/loginAction"
 import { useActionState, useEffect } from "react"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 
 const LoginForm = () => {
   const [state,action,pending]=useActionState(loginAction,false)
+  const router=useRouter()
 
   // to see toast message
  useEffect(() => {
@@ -17,10 +19,13 @@ const LoginForm = () => {
 
    if (state.success) {
      toast.success(state.message);
+    //  after login redirect dashboard
+    // router.push("/dashboard")
+
    } else {
      toast.error(state.message);
    }
- }, [state]);
+ }, [state,router]);
 
   return (
     <form action={action} className="space-y-5 ">
