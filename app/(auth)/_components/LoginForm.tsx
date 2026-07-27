@@ -4,15 +4,30 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { loginAction } from "../_actions/loginAction"
+import { useActionState, useEffect } from "react"
+import { toast } from "sonner"
 
 
 const LoginForm = () => {
+  const [state,action,pending]=useActionState(loginAction,false)
+
+  // to see toast message
+ useEffect(() => {
+   if (!state) return;
+
+   if (state.success) {
+     toast.success(state.message);
+   } else {
+     toast.error(state.message);
+   }
+ }, [state]);
+
   return (
-    <form action={loginAction} className="space-y-5 ">
+    <form action={action} className="space-y-5 ">
         <Card className="p-5 space-y-4">
             <Input required placeholder="Enter your email" name="email" type="email"></Input>
             <Input required placeholder="Enter your password" name="password" type="password"></Input>
-            <Button type="submit">Login</Button>
+            <Button  type="submit">{pending?"Submitting":"Login"}</Button>
         </Card>
     </form>
   )
