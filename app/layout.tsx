@@ -3,6 +3,7 @@ import "./globals.css";
 import { JetBrains_Mono, Merriweather } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
+import { Navbar } from "@/components/ui/navbar";
 
 const merriweatherHeading = Merriweather({subsets:['latin'],variable:'--font-heading'});
 
@@ -42,6 +43,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {/* navbar is here  */}
+     
 
         {children}
         <Toaster position="top-right" richColors />

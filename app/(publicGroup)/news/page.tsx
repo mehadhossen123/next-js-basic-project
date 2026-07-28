@@ -1,6 +1,11 @@
+
+
+
 import React from 'react'
 
-const NewsPage = () => {
+const NewsPage = async() => {
+ 
+
   return (
     <div>NewsPage</div>
   )

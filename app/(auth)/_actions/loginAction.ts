@@ -49,6 +49,9 @@ export const loginAction=async(prevState:PrevState,formData:FormData)=>{
             
         })
 
+        // decoded the access token to redirect particular role dashboard
+        const decodedToken=await 
+
         redirect("/dashboard")
     }
 

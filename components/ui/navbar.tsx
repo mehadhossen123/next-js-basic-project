@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Menu,
   X,
-  ChevronDown,
+  
   Command,
   LayoutDashboard,
   Package,
@@ -20,7 +20,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar,  AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +29,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { userLogout } from "@/app/service/logout";
+import { toast } from "sonner";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type NavLink = {
   label: string;
@@ -42,19 +46,20 @@ type MenuItem = {
   icon: LucideIcon;
 };
 
+
 // Primary navigation links rendered in the center of the navbar.
 const navLinks: NavLink[] = [
-  { label: "Dashboard", href: "#dashboard", icon: LayoutDashboard },
-  { label: "Products", href: "#products", icon: Package },
-  { label: "Customers", href: "#customers", icon: Users },
-  { label: "Analytics", href: "#analytics", icon: BarChart3 },
+  { label: "Dashboard", href: "dashboard", icon: LayoutDashboard },
+  { label: "Products", href: "products", icon: Package },
+  { label: "Customers", href: "customers", icon: Users },
+  { label: "Analytics", href: "analytics", icon: BarChart3 },
 ];
 
 // Account section of the profile dropdown.
 const profileMenuItems: MenuItem[] = [
-  { label: "Profile", href: "#profile", icon: User },
-  { label: "Billing", href: "#billing", icon: CreditCard },
-  { label: "Settings", href: "#settings", icon: Settings },
+  { label: "Profile", href: "profile", icon: User },
+  { label: "Billing", href: "billing", icon: CreditCard },
+  { label: "Settings", href: "settings", icon: Settings },
 ];
 
 // Support section of the profile dropdown.
@@ -62,16 +67,54 @@ const supportMenuItems: MenuItem[] = [
   { label: "Support", href: "#support", icon: LifeBuoy },
 ];
 
-const currentUser = {
-  name: "Jordan Rivera",
-  email: "jordan@acme.com",
-  avatar: "/professional-headshot.png",
-  initials: "JR",
+// const currentUser = {
+//   name: "Jordan Rivera",
+//   email: "jordan@acme.com",
+//   avatar: "/professional-headshot.png",
+//   initials: "JR",
+// };
+
+// type declaration
+
+type User = {
+  success: boolean;
+  successStatus: number;
+  message: string;
+  data: {
+    profile: {
+      id: string;
+      name: string;
+      email: string;
+      activeStatus: string;
+      role: string;
+      createdAt: string;
+      updatedAt: string;
+      profile: {
+        id: string;
+        profilePhoto: string | null;
+        bio: string | null;
+        userId: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    };
+  };
+};
+export type GetProfileResponse = {
+ 
+  user:User
+ 
 };
 
-export function Navbar() {
+
+
+
+
+
+export function Navbar({ user }: GetProfileResponse) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeHref, setActiveHref] = useState(navLinks[0]?.href);
+ 
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
@@ -82,14 +125,13 @@ export function Navbar() {
             <Command className="size-4" aria-hidden="true" />
           </span>
           <span className="text-lg font-semibold tracking-tight text-foreground">
-            Acme<span className="text-muted-foreground">Corp</span>
+            Prisma<span className="text-muted-foreground">Press</span>
           </span>
         </a>
 
         {/* Desktop nav links */}
         <ul className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => {
-            const Icon = link.icon;
             const isActive = activeHref === link.href;
             return (
               <li key={link.href}>
@@ -104,7 +146,6 @@ export function Navbar() {
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                 >
-                  <Icon className="size-4" aria-hidden="true" />
                   {link.label}
                 </a>
               </li>
@@ -114,7 +155,8 @@ export function Navbar() {
 
         {/* Right side: profile dropdown + mobile toggle */}
         <div className="flex items-center gap-2">
-          <ProfileDropdown />
+          {(user?.data?.profile) ? <ProfileDropdown user={user} /> : <Link href={"/login"}>
+          <Button>Login</Button></Link>}
 
           <Button
             variant="ghost"
@@ -169,71 +211,108 @@ export function Navbar() {
   );
 }
 
-function ProfileDropdown() {
+function ProfileDropdown({user}:GetProfileResponse) {
+   const [isLogin, setIsLogin] = useState(false);
+   const router=useRouter()
+
+   
+  //  show toast message when user logged out
+   useEffect(()=>{
+    if(isLogin){
+       toast.success("User logout successfully");
+      
+    }
+   },[isLogin])
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-full py-1 pl-1 pr-1 outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 sm:pr-2"
-            aria-label="Open user menu"
-          >
-            <Avatar className="size-8">
-              <AvatarImage
-                src={currentUser.avatar || "/placeholder.svg"}
-                alt={currentUser.name}
-              />
-              <AvatarFallback>{currentUser.initials}</AvatarFallback>
-            </Avatar>
-            <span className="hidden text-left sm:block">
-              <span className="block text-sm font-medium leading-tight text-foreground">
-                {currentUser.name}
-              </span>
-            </span>
-            <ChevronDown
-              className="hidden size-4 text-muted-foreground sm:block"
-              aria-hidden="true"
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex items-center cursor-pointer gap-2 rounded-full py-1 pl-1 pr-1 outline-none transition-colors   sm:pr-2"
+          aria-label="Open user menu"
+        >
+          <Avatar className="size-8">
+            <AvatarImage
+              // src={currentUser.avatar || "/placeholder.svg"}
+              alt={user?.data?.profile?.name}
             />
-          </button>
-        }
-      />
+            {/* <AvatarFallback>{currentUser.initials}</AvatarFallback> */}
+          </Avatar>
+
+          <span className="hidden text-left sm:block">
+            <span className="block text-sm font-medium leading-tight text-foreground">
+              {user?.data?.profile?.name}
+            </span>
+          </span>
+        </button>
+      </DropdownMenuTrigger>
+
       <DropdownMenuContent align="end" className="w-60">
-        <div className="flex flex-col px-1.5 py-1.5">
-          <span className="text-sm font-medium text-foreground">
-            {currentUser.name}
+        <div className="flex flex-col px-2 py-2">
+          <span className="text-sm font-medium">
+            {user?.data?.profile?.name}
           </span>
           <span className="text-xs text-muted-foreground">
-            {currentUser.email}
+            {/* ddd */}
+           {user?.data?.profile?.email}
           </span>
         </div>
+
         <DropdownMenuSeparator />
+
         <DropdownMenuGroup>
           {profileMenuItems.map((item) => {
             const Icon = item.icon;
+           
+
             return (
-              <DropdownMenuItem key={item.href} render={<a href={item.href} />}>
-                <Icon className="size-4" aria-hidden="true" />
-                {item.label}
+              <DropdownMenuItem key={item.href} asChild>
+                <a
+                  href={item.href}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Icon className="size-4" />
+                  {item.label}
+                </a>
               </DropdownMenuItem>
             );
           })}
         </DropdownMenuGroup>
+
         <DropdownMenuSeparator />
+
         <DropdownMenuGroup>
           {supportMenuItems.map((item) => {
             const Icon = item.icon;
+
             return (
-              <DropdownMenuItem key={item.href} render={<a href={item.href} />}>
-                <Icon className="size-4" aria-hidden="true" />
-                {item.label}
+              <DropdownMenuItem key={item.href} asChild>
+                <a
+                  href={item.href}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Icon className="size-4" />
+                  {item.label}
+                </a>
               </DropdownMenuItem>
             );
           })}
         </DropdownMenuGroup>
+
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive">
-          <LogOut className="size-4" aria-hidden="true" />
+
+        <DropdownMenuItem onClick={async()=>{
+          
+          // user logout function
+          await userLogout()
+          setIsLogin(true)
+          router.push("/login")
+
+          
+
+         
+        }} className="cursor-pointer text-red-600 focus:text-red-600">
+          <LogOut className="size-4" />
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
