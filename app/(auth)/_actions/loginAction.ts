@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import jwt, { JwtPayload } from "jsonwebtoken"
 
 type PrevState = {
   success: boolean
@@ -50,9 +51,17 @@ export const loginAction=async(prevState:PrevState,formData:FormData)=>{
         })
 
         // decoded the access token to redirect particular role dashboard
-        const decodedToken=await 
+        const decodedToken= jwt.decode(result?.data?.accessToken) as JwtPayload
+       if(decodedToken.role=="user"){
+          redirect("/dashboard");
 
-        redirect("/dashboard")
+       }else if (decodedToken.role=="admin"){
+        redirect("admin-dashboard")
+       } else if (decodedToken.role=="author"){
+        redirect("/author-dashboard")
+       }
+       
+      
     }
 
     return result
